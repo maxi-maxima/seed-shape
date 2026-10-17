@@ -51,6 +51,8 @@ Or run against a native schema:
 seed-shape plan examples/shop.schema.json --out reports/shop --rows 5 --seed preview --sql
 ```
 
+`--rows` accepts a positive integer. Missing, partial, or unsafe integer values fail before output files are written.
+
 Outputs:
 
 - `seed-shape.plan.md`: a human-readable fixture plan.

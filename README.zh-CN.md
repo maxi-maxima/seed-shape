@@ -51,6 +51,8 @@ seed-shape demo --out reports/demo
 seed-shape plan examples/shop.schema.json --out reports/shop --rows 5 --seed preview --sql
 ```
 
+`--rows` 接受正整数。缺失、不完整或超出安全整数范围的值会在写入输出文件前直接失败。
+
 输出文件：
 
 - `seed-shape.plan.md`：给人看的 fixture 计划。

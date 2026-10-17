@@ -31,7 +31,7 @@ export async function runCli(argv: string[]): Promise<CliResult> {
         return { exitCode: 1, stdout: "", stderr: "Missing schema input path.\n" };
       }
       const out = readOption(rest, "--out") ?? "reports/seed-shape";
-      const rows = Number.parseInt(readOption(rest, "--rows") ?? "3", 10);
+      const rows = parseRows(rest);
       const seed = readOption(rest, "--seed") ?? "seed-shape";
       const sql = rest.includes("--sql");
       const result = await runPlan({ inputPath, outDir: out, rows, seed, sql });
@@ -50,6 +50,18 @@ export async function runCli(argv: string[]): Promise<CliResult> {
 function readOption(args: string[], name: string): string | undefined {
   const index = args.indexOf(name);
   return index >= 0 ? args[index + 1] : undefined;
+}
+
+function parseRows(args: string[]): number {
+  if (!args.includes("--rows")) {
+    return 3;
+  }
+  const value = readOption(args, "--rows");
+  const rows = Number(value);
+  if (!value || !/^[1-9]\d*$/.test(value) || !Number.isSafeInteger(rows)) {
+    throw new Error("Invalid --rows: expected a positive integer");
+  }
+  return rows;
 }
 
 function diagnosticsText(diagnostics: { level: string; code: string; message: string }[]): string {

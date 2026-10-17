@@ -34,13 +34,14 @@ describe("runCli", () => {
     const schemaPath = join(dir, "input.schema.json");
     const out = join(dir, "out");
     await writeFile(schemaPath, JSON.stringify({
-      entities: [{ name: "User", rows: 1, fields: [{ name: "email", type: "email" }] }]
+      entities: [{ name: "User", fields: [{ name: "email", type: "email" }] }]
     }));
 
     const result = await runCli(["plan", schemaPath, "--out", out, "--rows", "2", "--sql"]);
 
     expect(result.exitCode).toBe(0);
-    await expect(readFile(join(out, "fixtures", "User.json"), "utf8")).resolves.toContain("@example.test");
+    const rows = JSON.parse(await readFile(join(out, "fixtures", "User.json"), "utf8")) as unknown[];
+    expect(rows).toHaveLength(2);
   });
 
   test("returns a non-zero exit for missing input", async () => {
@@ -48,5 +49,16 @@ describe("runCli", () => {
 
     expect(result.exitCode).toBe(1);
     expect(result.stderr).toContain("Input file not found");
+  });
+
+  test.each([undefined, "0", "2junk", "9007199254740992"])("rejects an invalid --rows value: %s", async (value) => {
+    const args = ["plan", "input.schema.json", "--rows"];
+    if (value !== undefined) {
+      args.push(value);
+    }
+    const result = await runCli(args);
+
+    expect(result.exitCode).toBe(1);
+    expect(result.stderr).toContain("Invalid --rows: expected a positive integer");
   });
 });

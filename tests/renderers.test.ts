@@ -34,4 +34,10 @@ describe("renderers", () => {
     expect(sql).toContain("INSERT INTO \"User\"");
     expect(sql).toContain("'a''o@example.test'");
   });
+
+  test("escapes quotes in SQL identifiers", () => {
+    const quotedSchema = { entities: [{ name: 'Team"List', rows: 1, fields: [] }] };
+    const sql = renderSeedSql(quotedSchema, { 'Team"List': [{ 'tag"name': "ok" }] });
+    expect(sql).toBe('INSERT INTO "Team""List" ("tag""name") VALUES (\'ok\');\n');
+  });
 });

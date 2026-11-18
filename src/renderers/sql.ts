@@ -8,10 +8,14 @@ export function renderSeedSql(schema: SeedShapeSchema, fixtures: FixtureMap): st
     for (const row of rows) {
       const columns = Object.keys(row);
       const values = columns.map((column) => formatSqlValue(row[column]));
-      statements.push(`INSERT INTO "${entity.name}" (${columns.map((column) => `"${column}"`).join(", ")}) VALUES (${values.join(", ")});`);
+      statements.push(`INSERT INTO ${quoteSqlIdentifier(entity.name)} (${columns.map(quoteSqlIdentifier).join(", ")}) VALUES (${values.join(", ")});`);
     }
   }
   return `${statements.join("\n")}\n`;
+}
+
+function quoteSqlIdentifier(value: string): string {
+  return `"${value.replaceAll('"', '""')}"`;
 }
 
 function formatSqlValue(value: FixtureRow[string]): string {
